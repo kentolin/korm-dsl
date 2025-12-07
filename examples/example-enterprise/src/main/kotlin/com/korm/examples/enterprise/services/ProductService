@@ -1,0 +1,199 @@
+// korm-dsl/examples/example-enterprise/src/main/kotlin/com/korm/examples/enterprise/services/ProductService.kt
+
+package com.korm.examples.enterprise.services
+
+import com.korm.dsl.cache.Cache
+import com.korm.dsl.core.Database
+import com.korm.dsl.monitoring.DatabaseMetrics
+import com.korm.dsl.monitoring.QueryMonitor
+import com.korm.examples.enterprise.models.*
+import java.math.BigDecimal
+import java.sql.ResultSet
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+
+class ProductService(
+    private val database: Database,
+    private val cache: Cache<String, Any>,
+    private val metrics: DatabaseMetrics,
+    private val queryMonitor: QueryMonitor
+) {
+
+    fun createProduct(
+        sku: String,
+        name: String,
+        description: String?,
+        category: String,
+        price: BigDecimal,
+        costPrice: BigDecimal,
+        stock: Int,
+        reorderLevel: Int = 10
+    ): Product {
+        val startTime = System.nanoTime()
+
+        val productId = database.transaction {
+            val query = insertInto(Products) {
+                it[Products.sku] = sku
+                it[Products.name] = name
+                description?.let { desc -> it[Products.description] = desc }
+                it[Products.category] = category
+                it[Products.price] = price
+                it[Products.costPrice] = costPrice
+                it[Products.stock] = stock
+                it[Products.reorderLevel] = reorderLevel
+            }
+            insert(query)
+        }
+
+        val duration = (System.nanoTime() - startTime) / 1_000_000
+        metrics.recordInsert()
+        queryMonitor.recordQuery("INSERT INTO products", emptyMap(), duration)
+
+        return findById(productId)!!
+    }
+
+    fun findById(id: Long): Product? {
+        val cacheKey = "product:$id"
+
+        cache.get(cacheKey)?.let {
+            return it as Product
+        }
+
+        val startTime = System.nanoTime()
+
+        val product = database.transaction {
+            val query = from(Products).where(Products.id eq id)
+            val results = select(query, ::mapProduct)
+            results.firstOrNull()
+        }
+
+        val duration = (System.nanoTime() - startTime) / 1_000_000
+        metrics.recordSelect()
+        queryMonitor.recordQuery("SELECT FROM products WHERE id = ?", mapOf("id" to id), duration)
+
+        product?.let { cache.put(cacheKey, it) }
+
+        return product
+    }
+
+    fun findBySku(sku: String): Product? {
+        val startTime = System.nanoTime()
+
+        val product = database.transaction {
+            val query = from(Products).where(Products.sku eq sku)
+            val results = select(query, ::mapProduct)
+            results.firstOrNull()
+        }
+
+        val duration = (System.nanoTime() - startTime) / 1_000_000
+        metrics.recordSelect()
+        queryMonitor.recordQuery("SELECT FROM products WHERE sku = ?", mapOf("sku" to sku), duration)
+
+        return product
+    }
+
+    fun findByCategory(category: String, limit: Int = 50): List<Product> {
+        val startTime = System.nanoTime()
+
+        val products = database.transaction {
+            val query = from(Products)
+                .where(Products.category eq category)
+                .orderBy(Products.name)
+                .limit(limit)
+            select(query, ::mapProduct)
+        }
+
+        val duration = (System.nanoTime() - startTime) / 1_000_000
+        metrics.recordSelect()
+        queryMonitor.recordQuery("SELECT FROM products WHERE category = ?",
+            mapOf("category" to category), duration)
+
+        return products
+    }
+
+    fun findLowStock(): List<Product> {
+        val startTime = System.nanoTime()
+
+        val products = database.transaction {
+            val sql = """
+                SELECT * FROM products
+                WHERE stock <= reorder_level
+                AND active = true
+                ORDER BY stock ASC
+            """.trimIndent()
+
+            val results = mutableListOf<Product>()
+            getConnection().use { conn ->
+                conn.createStatement().use { stmt ->
+                    stmt.executeQuery(sql).use { rs ->
+                        while (rs.next()) {
+                            results.add(mapProduct(rs))
+                        }
+                    }
+                }
+            }
+            results
+        }
+
+        val duration = (System.nanoTime() - startTime) / 1_000_000
+        queryMonitor.recordQuery("SELECT FROM products WHERE stock <= reorder_level", emptyMap(), duration)
+
+        return products
+    }
+
+    fun updateStock(id: Long, quantity: Int): Product {
+        val startTime = System.nanoTime()
+
+        database.transaction {
+            update(Products) {
+                it[Products.stock] = quantity
+                it[Products.updatedAt] = System.currentTimeMillis()
+            }.where(Products.id eq id).let { update(it) }
+        }
+
+        val duration = (System.nanoTime() - startTime) / 1_000_000
+        metrics.recordUpdate()
+        queryMonitor.recordQuery("UPDATE products SET stock = ? WHERE id = ?",
+            mapOf("quantity" to quantity, "id" to id), duration)
+
+        cache.remove("product:$id")
+
+        return findById(id)!!
+    }
+
+    fun adjustStock(id: Long, adjustment: Int): Product {
+        val product = findById(id) ?: throw IllegalArgumentException("Product not found")
+        val newStock = product.stock + adjustment
+
+        if (newStock < 0) {
+            throw IllegalArgumentException("Insufficient stock")
+        }
+
+        return updateStock(id, newStock)
+    }
+
+    private fun mapProduct(rs: ResultSet): Product {
+        return Product(
+            id = rs.getLong("id"),
+            sku = rs.getString("sku"),
+            name = rs.getString("name"),
+            description = rs.getString("description"),
+            category = rs.getString("category"),
+            price = rs.getBigDecimal("price"),
+            costPrice = rs.getBigDecimal("cost_price"),
+            stock = rs.getInt("stock"),
+            reorderLevel = rs.getInt("reorder_level"),
+            active = rs.getBoolean("active"),
+            createdAt = toLocalDateTime(rs.getLong("created_at")),
+            updatedAt = toLocalDateTime(rs.getLong("updated_at"))
+        )
+    }
+
+    private fun toLocalDateTime(epochMilli: Long): LocalDateTime {
+        return LocalDateTime.ofInstant(
+            Instant.ofEpochMilli(epochMilli),
+            ZoneId.systemDefault()
+        )
+    }
+}

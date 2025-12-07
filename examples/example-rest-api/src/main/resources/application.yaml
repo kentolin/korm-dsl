@@ -1,0 +1,14 @@
+# korm-dsl/examples/example-rest-api/src/main/resources/application.yaml
+
+ktor:
+  deployment:
+    port: 8080
+  application:
+    modules:
+      - com.korm.examples.restapi.MainKt.module
+
+database:
+  url: "jdbc:postgresql://localhost:5432/korm_rest_api"
+  driver: "org.postgresql.Driver"
+  user: "postgres"
+  password: "password"

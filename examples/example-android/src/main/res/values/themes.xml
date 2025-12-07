@@ -1,0 +1,8 @@
+<!-- examples/example-android/src/main/res/values/themes.xml -->
+
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <style name="Theme.KormExample" parent="android:Theme.Material.Light.NoActionBar">
+    <item name="android:statusBarColor">@android:color/transparent</item>
+  </style>
+</resources>
