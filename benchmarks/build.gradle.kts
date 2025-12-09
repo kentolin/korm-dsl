@@ -2,37 +2,50 @@
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
-    id("me.champeau.jmh") version "0.7.2"
+    id("org.jetbrains.kotlinx.benchmark") version "0.4.10"
 }
 
 dependencies {
     // Core module
     implementation(project(":korm-dsl-core"))
 
-    // Database drivers
-    implementation(libs.postgresql)
-    implementation(libs.hikaricp)
+    // Kotlin
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.kotlinx.coroutines.core)
+
+    // JMH (Benchmark framework)
+    implementation("org.openjdk.jmh:jmh-core:1.37")
+    implementation("org.openjdk.jmh:jmh-generator-annprocess:1.37")
 
     // Comparison ORMs
-    implementation("org.jetbrains.exposed:exposed-core:0.56.0")
-    implementation("org.jetbrains.exposed:exposed-dao:0.56.0")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.56.0")
-    implementation("org.hibernate:hibernate-core:6.6.3.Final")
-    implementation("org.jooq:jooq:3.19.15")
+    implementation("org.jetbrains.exposed:exposed-core:0.47.0")
+    implementation("org.jetbrains.exposed:exposed-dao:0.47.0")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.47.0")
+    implementation("org.hibernate:hibernate-core:6.4.2.Final")
+    implementation("org.jooq:jooq:3.19.1")
+
+    // Database drivers
+    implementation(libs.postgresql)
+    implementation(libs.mysql)
+    implementation(libs.sqlite)
+    implementation(libs.h2)
+    implementation(libs.hikaricp)
 
     // Logging
     implementation(libs.bundles.logging)
-
-    // JMH
-    jmh("org.openjdk.jmh:jmh-core:1.37")
-    jmh("org.openjdk.jmh:jmh-generator-annprocess:1.37")
 }
 
-jmh {
-    warmupIterations.set(3)
-    iterations.set(5)
-    fork.set(2)
-    benchmarkMode.set(listOf("thrpt", "avgt"))
-    timeUnit.set("ms")
-    resultFormat.set("JSON")
+benchmark {
+    configurations {
+        named("main") {
+            iterations = 5
+            iterationTime = 1
+            iterationTimeUnit = "sec"
+            warmups = 3
+        }
+    }
+
+    targets {
+        register("main")
+    }
 }

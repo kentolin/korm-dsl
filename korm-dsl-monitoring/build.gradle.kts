@@ -1,38 +1,87 @@
 // korm-dsl/korm-dsl-monitoring/build.gradle.kts
 
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.dokka)
     `maven-publish`
 }
 
-dependencies {
-    // Core module
-    implementation(project(":korm-dsl-core"))
+kotlin {
+    jvm {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "17"
+                freeCompilerArgs += listOf("-Xjvm-default=all")
+            }
+        }
+        testRuns["test"].executionTask.configure {
+            useJUnitPlatform()
+        }
+    }
 
-    // Kotlin
-    implementation(libs.kotlin.stdlib)
-    implementation(libs.kotlinx.coroutines.core)
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                // Core module
+                api(project(":korm-dsl-core"))
 
-    // Monitoring
-    api(libs.bundles.monitoring)
+                // Kotlin
+                implementation(libs.kotlin.stdlib)
+                implementation(libs.kotlinx.coroutines.core)
 
-    // Logging
-    implementation(libs.bundles.logging)
+                // Logging
+                api(libs.slf4j.api)
+            }
+        }
 
-    // Testing
-    testImplementation(libs.bundles.testing)
-    testRuntimeOnly(libs.junit.jupiter.engine)
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(libs.kotlinx.coroutines.test)
+            }
+        }
+
+        val jvmMain by getting {
+            dependencies {
+                // Micrometer
+                api(libs.micrometer.core)
+                api(libs.micrometer.prometheus)
+
+                // Logging implementation
+                implementation(libs.logback.classic)
+            }
+        }
+
+        val jvmTest by getting {
+            dependencies {
+                implementation(libs.junit.jupiter.api)
+                implementation(libs.junit.jupiter.engine)
+                implementation(libs.kotest.runner.junit5)
+                implementation(libs.kotest.assertions.core)
+                implementation(libs.mockk)
+            }
+        }
+    }
+}
+
+tasks.dokkaHtml.configure {
+    outputDirectory.set(layout.buildDirectory.dir("dokka"))
 }
 
 publishing {
     publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
-
+        withType<MavenPublication> {
             pom {
                 name.set("KORM DSL Monitoring")
-                description.set("Monitoring and metrics module for KORM DSL")
+                description.set("Monitoring and metrics module for KORM DSL with Prometheus and Micrometer support")
+                url.set("https://github.com/padam/korm-dsl")
+
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
             }
         }
     }

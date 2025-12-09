@@ -1,35 +1,85 @@
 // korm-dsl/korm-dsl-validation/build.gradle.kts
 
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.dokka)
     `maven-publish`
 }
 
-dependencies {
-    // Core module
-    implementation(project(":korm-dsl-core"))
+kotlin {
+    jvm {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "17"
+                freeCompilerArgs += listOf("-Xjvm-default=all")
+            }
+        }
+        testRuns["test"].executionTask.configure {
+            useJUnitPlatform()
+        }
+    }
 
-    // Kotlin
-    implementation(libs.kotlin.stdlib)
-    implementation(libs.kotlin.reflect)
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                // Core module
+                api(project(":korm-dsl-core"))
 
-    // Logging
-    implementation(libs.bundles.logging)
+                // Kotlin
+                implementation(libs.kotlin.stdlib)
+                implementation(libs.kotlin.reflect)
 
-    // Testing
-    testImplementation(libs.bundles.testing)
-    testRuntimeOnly(libs.junit.jupiter.engine)
+                // Logging
+                api(libs.slf4j.api)
+            }
+        }
+
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+            }
+        }
+
+        val jvmMain by getting {
+            dependencies {
+                // Logging implementation
+                implementation(libs.logback.classic)
+
+                // Optional: JSR-380 Bean Validation
+                compileOnly("javax.validation:validation-api:2.0.1.Final")
+            }
+        }
+
+        val jvmTest by getting {
+            dependencies {
+                implementation(libs.junit.jupiter.api)
+                implementation(libs.junit.jupiter.engine)
+                implementation(libs.kotest.runner.junit5)
+                implementation(libs.kotest.assertions.core)
+                implementation(libs.mockk)
+            }
+        }
+    }
+}
+
+tasks.dokkaHtml.configure {
+    outputDirectory.set(layout.buildDirectory.dir("dokka"))
 }
 
 publishing {
     publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
-
+        withType<MavenPublication> {
             pom {
                 name.set("KORM DSL Validation")
-                description.set("Validation module for KORM DSL")
+                description.set("Validation module for KORM DSL with support for custom rules and JSR-380")
+                url.set("https://github.com/padam/korm-dsl")
+
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
             }
         }
     }

@@ -1,8 +1,8 @@
-// examples/example-multiplatform/build.gradle.kts
+// korm-dsl/examples/example-multiplatform/build.gradle.kts
 
 plugins {
-    kotlin("multiplatform")
-    id("com.android.library")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.library)
 }
 
 kotlin {
@@ -40,14 +40,13 @@ kotlin {
     }
 
     sourceSets {
-        // Common Source Set
         val commonMain by getting {
             dependencies {
                 implementation(project(":korm-dsl-core"))
                 implementation(project(":korm-dsl-cache"))
 
                 // Coroutines
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+                implementation(libs.kotlinx.coroutines.core)
 
                 // DateTime
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
@@ -57,38 +56,29 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+                implementation(libs.kotlinx.coroutines.test)
             }
         }
 
-        // Android Source Set
         val androidMain by getting {
             dependencies {
-                implementation("org.xerial:sqlite-jdbc:3.45.1.0")
+                implementation(libs.sqlite)
             }
         }
 
-        val androidUnitTest by getting {
-            dependencies {
-                implementation("junit:junit:4.13.2")
-            }
-        }
-
-        // JVM Source Set
         val jvmMain by getting {
             dependencies {
-                implementation("org.xerial:sqlite-jdbc:3.45.1.0")
-                implementation("ch.qos.logback:logback-classic:1.4.14")
+                implementation(libs.sqlite)
+                implementation(libs.logback.classic)
             }
         }
 
         val jvmTest by getting {
             dependencies {
-                implementation("org.junit.jupiter:junit-jupiter:5.10.1")
+                implementation(libs.junit.jupiter)
             }
         }
 
-        // iOS Source Set
         val iosX64Main by getting
         val iosArm64Main by getting
         val iosSimulatorArm64Main by getting
@@ -97,10 +87,6 @@ kotlin {
             iosX64Main.dependsOn(this)
             iosArm64Main.dependsOn(this)
             iosSimulatorArm64Main.dependsOn(this)
-
-            dependencies {
-                // iOS-specific SQLite driver would go here
-            }
         }
 
         val iosX64Test by getting
