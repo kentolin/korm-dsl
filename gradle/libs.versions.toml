@@ -1,0 +1,24 @@
+[versions]
+kotlin = "2.1.0"
+coroutines = "1.9.0"
+hikari = "6.2.1"
+postgresql = "42.7.4"
+mysql = "9.1.0"
+sqlite = "3.47.1.0"
+h2 = "2.3.232"
+slf4j = "2.0.16"
+logback = "1.5.12"
+
+[libraries]
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+hikari = { module = "com.zaxxer:HikariCP", version.ref = "hikari" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+mysql = { module = "com.mysql:mysql-connector-j", version.ref = "mysql" }
+sqlite = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite" }
+h2 = { module = "com.h2database:h2", version.ref = "h2" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
