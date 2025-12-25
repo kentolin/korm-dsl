@@ -17,6 +17,7 @@
 - ⚡ **Batch Operations** - High-performance bulk inserts and updates
 - 🔄 **Transactions** - Automatic commit/rollback with exception handling
 - ✅ **Validation Framework** - Built-in data validation with custom rules
+- 🔧 **Schema Migrations** - Version-controlled database schema changes
 - 📦 **Connection Pooling** - HikariCP integration for optimal performance
 - 🎨 **Clean API** - Intuitive, fluent interface for building queries
 
@@ -30,7 +31,7 @@
 ```kotlin
 dependencies {
     implementation("com.korm:korm-dsl-core:0.1.0")
-
+    
     // Database drivers
     implementation("com.h2database:h2:2.3.232")
     // OR
@@ -261,9 +262,9 @@ korm-dsl/
 - ✅ Subqueries & UNION
 - ✅ Validation framework
 - ✅ Transaction management
+- ✅ Schema migrations
 
 ### Upcoming Features
-- 🔄 Schema migrations
 - 📊 Query caching
 - 🔍 Monitoring & profiling
 - 🪟 Window functions

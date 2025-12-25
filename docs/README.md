@@ -14,6 +14,7 @@ Complete documentation for KORM DSL - Kotlin Object-Relational Mapping framework
 - **[Queries](core-concepts/queries.md)** - SELECT, INSERT, UPDATE, DELETE operations
 - **[Relationships](core-concepts/relationships.md)** - JOINs and foreign keys
 - **[Transactions](core-concepts/transactions.md)** - Transaction management
+- **[Migrations](core-concepts/migrations.md)** - Schema migration system
 
 ### Advanced Features
 - **[Validation](advanced/validation.md)** - Data validation framework
