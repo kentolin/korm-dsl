@@ -18,6 +18,7 @@
 - 🔄 **Transactions** - Automatic commit/rollback with exception handling
 - ✅ **Validation Framework** - Built-in data validation with custom rules
 - 🔧 **Schema Migrations** - Version-controlled database schema changes
+- 📈 **Monitoring & Profiling** - Track performance, detect slow queries, collect metrics
 - 📦 **Connection Pooling** - HikariCP integration for optimal performance
 - 🎨 **Clean API** - Intuitive, fluent interface for building queries
 
@@ -263,10 +264,10 @@ korm-dsl/
 - ✅ Validation framework
 - ✅ Transaction management
 - ✅ Schema migrations
+- ✅ Monitoring & profiling
 
 ### Upcoming Features
 - 📊 Query caching
-- 🔍 Monitoring & profiling
 - 🪟 Window functions
 - 🌲 CTEs (Common Table Expressions)
 - 📱 Android/Multiplatform support
