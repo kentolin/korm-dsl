@@ -24,20 +24,28 @@ fun Table.create(db: Database) {
         columns.forEachIndexed { index, col ->
             append("  ${col.name} ")
 
-            // Handle auto-increment types specially
-            if (col.autoIncrement && db.dialect.name == "PostgreSQL") {
+            when {
                 // PostgreSQL uses SERIAL/BIGSERIAL as types
-                append(when(col.type) {
-                    "BIGINT" -> "BIGSERIAL"
-                    else -> "SERIAL"
-                })
-            } else {
-                // Normal data type
-                append(db.dialect.dataType(col.type))
+                col.autoIncrement && db.dialect.name == "PostgreSQL" -> {
+                    append(
+                        when (col.type) {
+                            "BIGINT" -> "BIGSERIAL"
+                            else -> "SERIAL"
+                        }
+                    )
+                }
+                // H2 (including PostgreSQL mode)
+                col.autoIncrement && db.dialect.name == "H2" -> {
+                    append("${db.dialect.dataType(col.type)} GENERATED ALWAYS AS IDENTITY")
+                }
 
-                // Add AUTO_INCREMENT modifier for other databases
-                if (col.autoIncrement && db.dialect.autoIncrement().isNotEmpty()) {
-                    append(" ${db.dialect.autoIncrement()}")
+                // MySQL and SQLite use type + AUTO_INCREMENT
+                col.autoIncrement && db.dialect.autoIncrement().isNotEmpty() -> {
+                    append("${db.dialect.dataType(col.type)} ${db.dialect.autoIncrement()}")
+                }
+                // Normal column without auto-increment
+                else -> {
+                    append(db.dialect.dataType(col.type))
                 }
             }
 
@@ -46,10 +54,12 @@ fun Table.create(db: Database) {
             if (col.unique && !col.primaryKey) append(" UNIQUE")
             if (col.defaultValue != null) {
                 append(" DEFAULT ")
-                append(when (col.defaultValue) {
-                    is String -> "'${col.defaultValue}'"
-                    else -> col.defaultValue
-                })
+                append(
+                    when (col.defaultValue) {
+                        is String -> "'${col.defaultValue}'"
+                        else -> col.defaultValue
+                    }
+                )
             }
 
             if (index < columns.size - 1) append(",\n")

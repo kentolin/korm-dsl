@@ -19,6 +19,7 @@
 - ✅ **Validation Framework** - Built-in data validation with custom rules
 - 🔧 **Schema Migrations** - Version-controlled database schema changes
 - 📈 **Monitoring & Profiling** - Track performance, detect slow queries, collect metrics
+- 🚀 **Advanced Queries** - Window functions, CTEs, CASE expressions, advanced aggregates
 - 📦 **Connection Pooling** - HikariCP integration for optimal performance
 - 🎨 **Clean API** - Intuitive, fluent interface for building queries
 
@@ -32,7 +33,7 @@
 ```kotlin
 dependencies {
     implementation("com.korm:korm-dsl-core:0.1.0")
-    
+
     // Database drivers
     implementation("com.h2database:h2:2.3.232")
     // OR
@@ -265,12 +266,12 @@ korm-dsl/
 - ✅ Transaction management
 - ✅ Schema migrations
 - ✅ Monitoring & profiling
+- ✅ Advanced queries (Window functions, CTEs, CASE)
 
 ### Upcoming Features
 - 📊 Query caching
-- 🪟 Window functions
-- 🌲 CTEs (Common Table Expressions)
 - 📱 Android/Multiplatform support
+- 🔐 Advanced security features
 
 ---
 

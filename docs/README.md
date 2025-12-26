@@ -20,6 +20,7 @@ Complete documentation for KORM DSL - Kotlin Object-Relational Mapping framework
 - **[Validation](advanced/validation.md)** - Data validation framework
 - **[Performance](advanced/performance.md)** - Optimization techniques
 - **[Monitoring](advanced/monitoring.md)** - Query monitoring and profiling
+- **[Advanced Queries](advanced/advanced-queries.md)** - Window functions, CTEs, CASE expressions
 
 ---
 
