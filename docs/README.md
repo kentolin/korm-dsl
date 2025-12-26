@@ -21,6 +21,7 @@ Complete documentation for KORM DSL - Kotlin Object-Relational Mapping framework
 - **[Performance](advanced/performance.md)** - Optimization techniques
 - **[Monitoring](advanced/monitoring.md)** - Query monitoring and profiling
 - **[Advanced Queries](advanced/advanced-queries.md)** - Window functions, CTEs, CASE expressions
+- **[Caching](advanced/caching.md)** - Query result caching for performance
 
 ---
 

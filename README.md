@@ -20,6 +20,7 @@
 - 🔧 **Schema Migrations** - Version-controlled database schema changes
 - 📈 **Monitoring & Profiling** - Track performance, detect slow queries, collect metrics
 - 🚀 **Advanced Queries** - Window functions, CTEs, CASE expressions, advanced aggregates
+- 💾 **Query Caching** - LRU cache with TTL support for improved performance
 - 📦 **Connection Pooling** - HikariCP integration for optimal performance
 - 🎨 **Clean API** - Intuitive, fluent interface for building queries
 
@@ -33,7 +34,7 @@
 ```kotlin
 dependencies {
     implementation("com.korm:korm-dsl-core:0.1.0")
-
+    
     // Database drivers
     implementation("com.h2database:h2:2.3.232")
     // OR
@@ -267,11 +268,13 @@ korm-dsl/
 - ✅ Schema migrations
 - ✅ Monitoring & profiling
 - ✅ Advanced queries (Window functions, CTEs, CASE)
+- ✅ Query result caching
 
 ### Upcoming Features
-- 📊 Query caching
-- 📱 Android/Multiplatform support
+- 📱 Multiplatform support (JVM, Android, Native)
 - 🔐 Advanced security features
+- 🔄 Replication support
+- 📡 Event streaming
 
 ---
 
